@@ -104,9 +104,15 @@
         imageContainer.innerHTML = ""; 
 
         try {
-          const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+          // New payload and API endpoint for the new model
+          const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseModalities: ['IMAGE']
+            }
+          };
           const apiKey = ""; // Canvas will provide this at runtime
-          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`;
           
           const response = await fetch(apiUrl, {
             method: 'POST',
@@ -119,7 +125,7 @@
           }
 
           const result = await response.json();
-          const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+          const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
 
           if (base64Data) {
             const imageUrl = `data:image/png;base64,${base64Data}`;
@@ -152,7 +158,7 @@
       });
 
       // Generate a default image on page load
-      generateImage("a cozy reading nook with a fireplace, digital art");
+      generateImage("a vibrant oil painting of a futuristic city at sunset");
     });
   </script>
 
